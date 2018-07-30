@@ -427,3 +427,146 @@ Nossa ViewModel ficará assim:
         }
     }
 ````
+
+
+## Alteração da CalculoValorHoraPage
+
+Vamos alterar nossa função para ficar vinculada a ViewModel que criamos anteriormente. Vamos editar o arquivo CalculoValorHoraPage.xaml.cs, vamos apagar todas as funções que haviamos criado, deixando apenas o construtor:
+
+```c#
+	[XamlCompilation(XamlCompilationOptions.Compile)]
+	public partial class CalculoValorHoraPage : ContentPage
+	{
+		public CalculoValorHoraPage ()
+		{
+			InitializeComponent ();
+
+            CalcularValorHoraButton.Clicked += CalcularValorHoraButton_Clicked;
+		}       
+    }
+````
+
+No construtor vamos remover a linha da vinculação do evento de Clicked. Após vamos atribuir ao Binding da nossa View que será a sua fonte de dados, ou seja, a nossa ViewModel, para isso vamos criar uma instância da CalculoValorHoraPageViewModel e atribuir a propriedade BindingContext da nossa classe. Nossa CalculoValorHoraPage.xaml.cs ficará assim:
+
+```c#
+[XamlCompilation(XamlCompilationOptions.Compile)]
+	public partial class CalculoValorHoraPage : ContentPage
+	{
+		public CalculoValorHoraPage ()
+		{
+			InitializeComponent ();
+            var viewModel = new CalculoValorHoraPageViewModel();
+            BindingContext = viewModel;
+        }       
+    }
+````
+
+Agora vamos editar o arquivo CalculoValorHoraPage.xaml. Em nossos Entrys não precisaremos mais dos names, então vamos revomer as propriedades x:Name. O Texto do Entry agora está vinculado a nossa ViewModel pelo Binding. No Entry vamos adicionar a propriedade Text, em seu valor, entre aspas duplas, vamos abrir chaves e escrever a palavra Binding, indicando que é para utilizar Data Binding, então logo a frente da escrita Binding, vamos por o nome da variável bindable que está na nossa ViewModel, para o campo de valor ganho por mês haviamos criado na ViewModel uma propriedade chamada ValorGanhoMes (não confuda com o x:Name, não estamos utilizando ele).
+
+```xml
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CalculadoraFreelancer01.CalculoValorHoraPage"
+             Title="Valor da Hora"
+             Padding="10">
+    <ContentPage.Content>
+        <StackLayout>
+
+            <Label Text="Valor ganho por mês" />
+            <Entry Placeholder="Valor ganho por mês"
+                   Text="{Binding ValorGanhoMes}"
+                   Keyboard="Numeric"/>
+
+            <Label Text="Horas trabalhadas por dia" />
+            <Entry Placeholder="Horas trabalhadas por dia"
+                   Text="{Binding HorasTrabalhadasPorDia}"
+                   Keyboard="Numeric"/>
+
+            <Label Text="Dias trabalhados por mês" />
+            <Entry Placeholder="Dias trabalhados por mês"
+                   Text="{Binding DiasTrabalhadosPorMes}"
+                   Keyboard="Numeric"/>
+
+            <Label Text="Dias de férias por ano" />
+            <Entry Placeholder="Dias de férias por ano"
+                   Text="{Binding DiasFeriasPorAno}"
+                   Keyboard="Numeric"/>
+
+            <Label Text="R$ 00,00 / hora"
+                   FontSize="Large"
+                   TextColor="Green"/>
+
+            <Button Text="Gravar"
+                    BackgroundColor="#6699ff"
+                    TextColor="White"
+                    x:Name="CalcularValorHoraButton"/>
+
+
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
+````
+
+Agora no Text da nossa label que representa o Valor da hora podemos referenciar diretamente a nossa propriedade da ViewModel que chamamos de ValorDaHora. Além disso podemos utilizar o StringFormat do C# diretamente no nosso xaml para formatar o valor em reais, semelhante como faziamos no nosso Code Behind, dessa forma:
+
+```xml
+     <Label Text="{Binding ValorDaHora, StringFormat='{0:C} / hora'}"
+             FontSize="Large"
+             TextColor="Green"/>
+````
+
+No nosso button de gravar, vamos chamar o Command que criamos na nossa ViewModel, o próprio elemento Button do Xamarin tem uma propriedade chamada Command, para passarmos o nome do comando a ser chamado, dessa forma:
+
+```xml
+    <Button Text="Gravar"
+           BackgroundColor="#6699ff"
+           TextColor="White"                    
+           Command="{Binding GravarCommand}"/>
+````
+
+Nosso arquivo .xaml ficou dessa forma:
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CalculadoraFreelancer.Views.CalculoValorHoraPage"
+             Icon="person.png"
+            Title="Valor da Hora"
+            Padding="10">
+    <ContentPage.Content>
+        <StackLayout>
+
+            <Label Text="Valor ganho por mês" />
+            <Entry Placeholder="Valor ganho por mês"
+                   Text="{Binding ValorGanhoMes}"
+                  Keyboard="Numeric"/>
+
+            <Label Text="Horas trabalhadas por dia" />
+            <Entry Placeholder="Horas trabalhadas por dia"
+                   Text="{Binding HorasTrabalhadasPorDia}"
+                  Keyboard="Numeric"/>
+
+            <Label Text="Dias trabalhados por mês" />
+            <Entry Placeholder="Dias trabalhados por mês"
+                   Text="{Binding DiasTrabalhadosPorMes}"
+                  Keyboard="Numeric"/>
+
+            <Label Text="Dias de férias por ano" />
+            <Entry Placeholder="Dias de férias por ano"
+                   Text="{Binding DiasFeriasPorAno}"
+                  Keyboard="Numeric"/>
+
+            <Label Text="{Binding ValorDaHora, StringFormat='{0:C} / hora'}"
+                  FontSize="Large"
+                  TextColor="Green"/>
+
+            <Button Text="Gravar"
+                    BackgroundColor="#6699ff"
+                    TextColor="White"
+                    Command="{Binding GravarCommand}"/>
+
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
+````
