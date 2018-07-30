@@ -23,7 +23,7 @@ Dentro da pasta Base, vamos criar uma classe chamada ViewModelBase. Essa classe 
 ninguém poderá criar uma instância do tipo ViewModelBase, somente será possível herdar dessa classe.
 
 ```c#
-   public class ViewModelBase
+   public abstract class ViewModelBase
     {
         
     }
@@ -33,7 +33,7 @@ Então vamos implementar da interface INotifyPropertyChanged. Quando implementam
 View e a ViewModel que houve alterações nas variáveis que configurarmos, ou seja, ela notifica a todos que estão referenciando a variável que houve alteração em seu conteúdo.
 
 ```c#
-   public class ViewModelBase : INotifyPropertyChanged
+   public abstract class ViewModelBase : INotifyPropertyChanged
     {
     
     }
@@ -43,15 +43,14 @@ Ao implementar dessa interface, ela nos forçará a implementar o PropertyChange
 notificar as Views vinculadas a ViewModel quando houver alteração de valor na propriedade especificada.
 
 ```c#
-   public class ViewModelBase : INotifyPropertyChanged
+   public abstract class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
     }
 ````
 
 Vamos por partes, primeiramente precisaremos de uma função que receberá o nome da propriedade que foi alterada, e então utilizaremos o 
-nosso objeto PropertyChanged para notificar que houve alteração nessa propriedade. É necessário o nome da propriedade pois a View e a ViewModel
-referenciará esse nome.
+nosso objeto PropertyChanged para notificar que houve alteração nessa propriedade. É necessário o nome da propriedade pois a View e a ViewModel referenciarão esse nome.
 
 ```c#
   public abstract class ViewModelBase : INotifyPropertyChanged
@@ -75,7 +74,7 @@ como sempre será disparado um evento ao alterar uma variável, também é neces
 chamar a nossa função que criamos anteriormente. Ficará dessa forma:
 
 ```c#
-  public class ViewModelBase : INotifyPropertyChanged
+  public abstract class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -226,7 +225,7 @@ Antes tinhamos a função CalcularValorHoraButton_Clicked, agora vamos recriá-l
 
 ### Command GravarCommand
 
-Como dito durante as aulas, além da View referencias as variáveis, ela pode chamar diretamente funções da nossa ViewModel, chamadas de Commands. Como ao clicar em gravar na nossa tela, queremos que grave o valor da hora do profissional, o click desse botão irá acionar um comando na nossa ViewModel para ela cuidar dessa operação. Na nossa ViewModel vamos criar uma propriedade do tipo Command e vamos a chamar de GravarCommand, dessa forma: 
+Como dito durante a aula, além da View referenciar as variáveis, ela pode chamar diretamente funções da nossa ViewModel, chamadas de Commands. Como ao clicar em gravar na nossa tela, queremos que grave o valor da hora do profissional, o click desse botão irá acionar um comando na nossa ViewModel para ela cuidar dessa operação. Na nossa ViewModel vamos criar uma propriedade do tipo Command e vamos a chamar de GravarCommand, dessa forma: 
 
 ```c#
   public Command GravarCommand { get; }
@@ -278,7 +277,7 @@ Agora precisamos criar essa função ExecuteGravarCommand. Ela será similar a G
 
 ### Chamada da função CalcularValorHora
 
-Antes chamavamos a função que calculava o valor do profissional ao clicar em gravar, agora podemos chamar toda vez em que um valor usado no cálculo for alterado, isso graças ao Data Bindings. Então todas ver que um valor for setado ( na função set) vamos chamar a função CalcularValorHora(). Então no Set da ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes e DiasFeriasPorAno chamaremos a função CalcularValorHora(). Ficará assim: 
+Antes chamavamos a função que calculava o valor do profissional ao clicar em gravar, agora podemos chamar toda vez em que um valor usado no cálculo for alterado, isso graças ao Data Bindings. Então todas as vezes que um valor for setado ( na função set) vamos chamar a função CalcularValorHora(). Então no Set da ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes e DiasFeriasPorAno chamaremos a função CalcularValorHora(). Ficará assim: 
 
 ```c#
         private double valorGanhoMes;
@@ -437,7 +436,7 @@ Nossa ViewModel ficará assim:
 
 ## Alteração da CalculoValorHoraPage
 
-Vamos alterar nossa função para ficar vinculada a ViewModel que criamos anteriormente. Vamos editar o arquivo CalculoValorHoraPage.xaml.cs, vamos apagar todas as funções que haviamos criado, deixando apenas o construtor:
+Vamos alterar nossa View para ficar vinculada a ViewModel que criamos anteriormente. Vamos editar o arquivo CalculoValorHoraPage.xaml.cs, vamos apagar todas as funções que haviamos criado, deixando apenas o construtor:
 
 ```c#
 	[XamlCompilation(XamlCompilationOptions.Compile)]
@@ -576,3 +575,17 @@ Nosso arquivo .xaml ficou dessa forma:
     </ContentPage.Content>
 </ContentPage>
 ````
+## Testando o projeto
+
+Altere o arquivo App.xaml.cs para chamar a nossa tela, assim:
+
+```c#
+	public App ()
+	{
+		InitializeComponent();
+
+		MainPage = new NavigationPage(new CalculoValorHoraPage());
+	}
+````
+
+Agora é só preencher as informações na tela que irá abrir e clicar em gravar =]
