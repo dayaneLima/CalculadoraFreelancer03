@@ -210,15 +210,17 @@ Antes tinhamos a função CalcularValorHoraButton_Clicked, agora vamos recriá-l
  private void CalcularValorHora()
         {
 
-            double valorGanhoAnual = ValorGanhoMes * 12;
-            int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
+          if (ValorGanhoMes > 0 && DiasTrabalhadosPorMes > 0 && HorasTrabalhadasPorDia > 0) {
+                double valorGanhoAnual = ValorGanhoMes * 12;
+                int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
 
-            if (DiasFeriasPorAno > 0)
-            {
-                totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+                if (DiasFeriasPorAno > 0)
+                {
+                    totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+                }
+
+                ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
             }
-
-            ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
         }
 ````
 
@@ -232,15 +234,17 @@ Como dito durante as aulas, além da View referencias as variáveis, ela pode ch
   private void CalcularValorHora()
   {
 
-      double valorGanhoAnual = ValorGanhoMes * 12;
-      int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
+      if (ValorGanhoMes > 0 && DiasTrabalhadosPorMes > 0 && HorasTrabalhadasPorDia > 0) {
+	double valorGanhoAnual = ValorGanhoMes * 12;
+	int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
 
-      if (DiasFeriasPorAno > 0)
-      {
-          totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
-      }
+	if (DiasFeriasPorAno > 0)
+	{
+	    totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+	}
 
-      ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
+	ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
+    }
   }
 ````
 
@@ -401,15 +405,17 @@ Nossa ViewModel ficará assim:
         private void CalcularValorHora()
         {
 
-            double valorGanhoAnual = ValorGanhoMes * 12;
-            int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
+             if (ValorGanhoMes > 0 && DiasTrabalhadosPorMes > 0 && HorasTrabalhadasPorDia > 0) {
+                double valorGanhoAnual = ValorGanhoMes * 12;
+                int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
 
-            if (DiasFeriasPorAno > 0)
-            {
-                totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+                if (DiasFeriasPorAno > 0)
+                {
+                    totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+                }
+
+                ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
             }
-
-            ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
         }
 
         private async void ExecuteGravarCommand(object obj)
