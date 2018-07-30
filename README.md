@@ -530,41 +530,41 @@ Nosso arquivo .xaml ficou dessa forma:
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CalculadoraFreelancer.Views.CalculoValorHoraPage"
-             Icon="person.png"
-            Title="Valor da Hora"
-            Padding="10">
+             x:Class="CalculadoraFreelancer01.CalculoValorHoraPage"
+             Title="Valor da Hora"
+             Padding="10">
     <ContentPage.Content>
         <StackLayout>
 
             <Label Text="Valor ganho por mês" />
             <Entry Placeholder="Valor ganho por mês"
                    Text="{Binding ValorGanhoMes}"
-                  Keyboard="Numeric"/>
+                   Keyboard="Numeric"/>
 
             <Label Text="Horas trabalhadas por dia" />
             <Entry Placeholder="Horas trabalhadas por dia"
                    Text="{Binding HorasTrabalhadasPorDia}"
-                  Keyboard="Numeric"/>
+                   Keyboard="Numeric"/>
 
             <Label Text="Dias trabalhados por mês" />
             <Entry Placeholder="Dias trabalhados por mês"
                    Text="{Binding DiasTrabalhadosPorMes}"
-                  Keyboard="Numeric"/>
+                   Keyboard="Numeric"/>
 
             <Label Text="Dias de férias por ano" />
             <Entry Placeholder="Dias de férias por ano"
                    Text="{Binding DiasFeriasPorAno}"
-                  Keyboard="Numeric"/>
+                   Keyboard="Numeric"/>
 
             <Label Text="{Binding ValorDaHora, StringFormat='{0:C} / hora'}"
-                  FontSize="Large"
-                  TextColor="Green"/>
+                   FontSize="Large"
+                   TextColor="Green"/>
 
             <Button Text="Gravar"
                     BackgroundColor="#6699ff"
-                    TextColor="White"
+                    TextColor="White"                    
                     Command="{Binding GravarCommand}"/>
+
 
         </StackLayout>
     </ContentPage.Content>
