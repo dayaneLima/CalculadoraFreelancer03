@@ -109,3 +109,85 @@ aos interessados que houve alteração na propriedade, e por fim retornado true,
 
 
 ## Criação da CalculoValorHoraPageViewModel
+
+Vamos criar a ViewModel para a nossa View CalculoValorHoraPage. Dentro da pasta ViewModels, crie uma classe chamada CalculoValorHoraPageViewModel que herdará da nossa ViewModelBase criada anteriormente.
+
+```c#
+ public class CalculoValorHoraPageViewModel : ViewModelBase
+    {
+    }
+````
+
+Vamos criar para cada elemento que tinhamos na View (ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes, DiasFeriasPorAno e o ValorDaHora) uma propriedade bindable na nossa ViewModel. Uma propriedade bindable quer dizer que é uma propriedade que ao ser alterada deverá ser notificada sua alteração. Primeiramente criamos uma variável privada e depois uma pública, nessa última, no set deveremos chamar o SetProperty, que verificará se houve alteração no valor da variável e realizar a notificação informando que teve alteração no conteúdo da variável. Por convensão, a variável privada é escrita em minúscula e a pública maiúscula. O ValorGanhoMes ficará dessa forma:
+
+
+```c#
+   public class CalculoValorHoraPageViewModel : ViewModelBase
+    {
+        private double valorGanhoMes;
+        public double ValorGanhoMes
+        {
+            get { return valorGanhoMes; }
+            set
+            {
+                SetProperty(ref valorGanhoMes, value);
+            }
+        }
+    }
+````
+
+Agora vamos fazer para o restante das variáveis:
+
+```c#
+    public class CalculoValorHoraPageViewModel : ViewModelBase
+    {
+        private double valorGanhoMes;
+        public double ValorGanhoMes
+        {
+            get { return valorGanhoMes; }
+            set
+            {
+                SetProperty(ref valorGanhoMes, value);
+            }
+        }
+
+        private int horasTrabalhadasPorDia;
+        public int HorasTrabalhadasPorDia
+        {
+            get { return horasTrabalhadasPorDia; }
+            set
+            {
+                SetProperty(ref horasTrabalhadasPorDia, value);
+            }
+        }
+
+        private int diasTrabalhadosPorMes;
+        public int DiasTrabalhadosPorMes
+        {
+            get { return diasTrabalhadosPorMes; }
+            set
+            {
+                SetProperty(ref diasTrabalhadosPorMes, value);
+            }
+        }
+
+        private int diasFeriasPorAno;
+        public int DiasFeriasPorAno
+        {
+            get { return diasFeriasPorAno; }
+            set
+            {
+                SetProperty(ref diasFeriasPorAno, value);
+            }
+        }
+
+        private double valorDaHora;
+        public double ValorDaHora
+        {
+            get { return valorDaHora; }
+            set { SetProperty(ref valorDaHora, value); }
+        }
+
+    }
+````
+
