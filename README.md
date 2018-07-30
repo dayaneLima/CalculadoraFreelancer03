@@ -30,8 +30,7 @@ ninguém poderá criar uma instância do tipo ViewModelBase, somente será poss�
 ````
 
 Então vamos implementar da interface INotifyPropertyChanged. Quando implementamos dessa interface ela nos ajuda a notificar a 
-View e a ViewModel que houve alterações nas variáveis que configurarmos, ou seja, ela notifica a todos que estão referenciando a variável 
-que houve alteração em seu conteúdo.
+View e a ViewModel que houve alterações nas variáveis que configurarmos, ou seja, ela notifica a todos que estão referenciando a variável que houve alteração em seu conteúdo.
 
 ```c#
    public class ViewModelBase : INotifyPropertyChanged
@@ -110,7 +109,7 @@ aos interessados que houve alteração na propriedade, e por fim retornado true,
 
 ## Criação da CalculoValorHoraPageViewModel
 
-Vamos criar a ViewModel para a nossa View CalculoValorHoraPage. Dentro da pasta ViewModels, crie uma classe chamada CalculoValorHoraPageViewModel que herdará da nossa ViewModelBase criada anteriormente.
+Vamos criar a ViewModel para a nossa View CalculoValorHoraPage. Iremos remover toda a lógica do Code Behind e adicionar na nossa ViewModel. Dentro da pasta ViewModels, crie uma classe chamada CalculoValorHoraPageViewModel que herdará da nossa ViewModelBase criada anteriormente.
 
 ```c#
  public class CalculoValorHoraPageViewModel : ViewModelBase
@@ -118,7 +117,9 @@ Vamos criar a ViewModel para a nossa View CalculoValorHoraPage. Dentro da pasta 
     }
 ````
 
-Vamos criar para cada elemento que tinhamos na View (ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes, DiasFeriasPorAno e o ValorDaHora) uma propriedade bindable na nossa ViewModel. Uma propriedade bindable quer dizer que é uma propriedade que ao ser alterada deverá ser notificada sua alteração. Primeiramente criamos uma variável privada e depois uma pública, nessa última, no set deveremos chamar o SetProperty, que verificará se houve alteração no valor da variável e realizar a notificação informando que teve alteração no conteúdo da variável. Por convensão, a variável privada é escrita em minúscula e a pública maiúscula. O ValorGanhoMes ficará dessa forma:
+### Variáveis Bindables
+
+Vamos criar para cada elemento que tinhamos na View (ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes, DiasFeriasPorAno, ValorDaHora e o Profissional) uma propriedade bindable na nossa ViewModel. Uma propriedade bindable quer dizer que é uma propriedade que ao ser alterada deverá ser notificada sua alteração. Primeiramente criamos uma variável privada e depois uma pública, nessa última, no set deveremos chamar o SetProperty, que verificará se houve alteração no valor da variável e realizar a notificação informando que teve alteração no conteúdo da variável. Por convensão, a variável privada é escrita em minúscula e a pública maiúscula. O ValorGanhoMes ficará dessa forma:
 
 
 ```c#
@@ -187,7 +188,242 @@ Agora vamos fazer para o restante das variáveis:
             get { return valorDaHora; }
             set { SetProperty(ref valorDaHora, value); }
         }
+        
+        private Profissional profissional;
+        public Profissional Profissional
+        {
+            get { return profissional; }
+            set
+            {
+                SetProperty(ref profissional, value);
+            }
+        }
 
     }
 ````
 
+### Função CalcularValorHora
+
+Antes tinhamos a função CalcularValorHoraButton_Clicked, agora vamos recriá-la. Vamos criar na ViewModel uma função chamada CalcularValorHora, ela terá a mesma lógica da CalcularValorHoraButton_Clicked, mas sem a necessidade de chamar a função de gravar e de fazer as conversões de tipagem, já que nossas propriedades já são tipadas. Ficará dessa forma:
+
+```c#
+ private void CalcularValorHora()
+        {
+
+            double valorGanhoAnual = ValorGanhoMes * 12;
+            int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
+
+            if (DiasFeriasPorAno > 0)
+            {
+                totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+            }
+
+            ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
+        }
+````
+
+### Command GravarCommand
+
+Como dito durante as aulas, além da View referencias as variáveis, ela pode chamar diretamente funções da nossa ViewModel, chamadas de Commands. Como ao clicar em gravar na nossa tela, queremos que grave o valor da hora do profissional, o click desse botão irá acionar um comando na nossa ViewModel para ela cuidar dessa operação. Na nossa ViewModel vamos criar uma propriedade do tipo Command e vamos a chamar de GravarCommand, dessa forma: 
+
+```c#
+  public Command GravarCommand { get; }
+
+  private void CalcularValorHora()
+  {
+
+      double valorGanhoAnual = ValorGanhoMes * 12;
+      int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
+
+      if (DiasFeriasPorAno > 0)
+      {
+          totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+      }
+
+      ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
+  }
+````
+
+Agora vamos criar um construtor para a nossa classe e instanciar esse objeto do tipo Command. Ao instanciar esse objeto, devemos informar a ele o nome da função responsável por cuidar do comando, ou seja, qual função será executada quando o commando for acionado. Vamor aproveitar e instanciar o nosso objeto Profissional também. Dessa forma: 
+
+```c#
+   public CalculoValorHoraPageViewModel()
+  {
+      GravarCommand = new Command(ExecuteGravarCommand);
+      Profissional = new Profissional();
+  }
+````
+
+Agora precisamos criar essa função ExecuteGravarCommand. Ela será similar a Gravar da CalculoValorHoraPage, mas agora atribuiremos os valores ao objeto Profissional ao invés de já criá-lo chamando a função de inserir. Ficará assim:
+
+```c#
+  private async void ExecuteGravarCommand(object obj)
+        {
+            Profissional.ValorGanhoMes = ValorGanhoMes;
+            Profissional.HorasTrabalhadasPorDia = HorasTrabalhadasPorDia;
+            Profissional.DiasTrabalhadosPorMes = DiasTrabalhadosPorMes;
+            Profissional.DiasFeriasPorAno = DiasFeriasPorAno;
+            Profissional.ValorPorHora = ValorDaHora;
+
+            var profissionalAzureClient = new AzureRepository();
+            profissionalAzureClient.Insert(Profissional);
+
+            await App.Current.MainPage.DisplayAlert("Sucesso", "Valor por hora gravado!", "Ok");
+        }
+````
+
+### Chamada da função CalcularValorHora
+
+Antes chamavamos a função que calculava o valor do profissional ao clicar em gravar, agora podemos chamar toda vez em que um valor usado no cálculo for alterado, isso graças ao Data Bindings. Então todas ver que um valor for setado ( na função set) vamos chamar a função CalcularValorHora(). Então no Set da ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes e DiasFeriasPorAno chamaremos a função CalcularValorHora(). Ficará assim: 
+
+```c#
+        private double valorGanhoMes;
+        public double ValorGanhoMes
+        {
+            get { return valorGanhoMes; }
+            set
+            {
+                SetProperty(ref valorGanhoMes, value);
+                CalcularValorHora();
+            }
+        }
+
+        private int horasTrabalhadasPorDia;
+        public int HorasTrabalhadasPorDia
+        {
+            get { return horasTrabalhadasPorDia; }
+            set
+            {
+                SetProperty(ref horasTrabalhadasPorDia, value);
+                CalcularValorHora();
+            }
+        }
+
+        private int diasTrabalhadosPorMes;
+        public int DiasTrabalhadosPorMes
+        {
+            get { return diasTrabalhadosPorMes; }
+            set
+            {
+                SetProperty(ref diasTrabalhadosPorMes, value);
+                CalcularValorHora();
+            }
+        }
+
+        private int diasFeriasPorAno;
+        public int DiasFeriasPorAno
+        {
+            get { return diasFeriasPorAno; }
+            set
+            {
+                SetProperty(ref diasFeriasPorAno, value);
+                CalcularValorHora();
+            }
+        }
+````
+
+### CalculoValorHoraPageViewModel
+
+Nossa ViewModel ficará assim:
+
+```c#
+ public class CalculoValorHoraPageViewModel : ViewModelBase
+    {
+        private double valorGanhoMes;
+        public double ValorGanhoMes
+        {
+            get { return valorGanhoMes; }
+            set
+            {
+                SetProperty(ref valorGanhoMes, value);
+                CalcularValorHora();
+            }
+        }
+
+        private int horasTrabalhadasPorDia;
+        public int HorasTrabalhadasPorDia
+        {
+            get { return horasTrabalhadasPorDia; }
+            set
+            {
+                SetProperty(ref horasTrabalhadasPorDia, value);
+                CalcularValorHora();
+            }
+        }
+
+        private int diasTrabalhadosPorMes;
+        public int DiasTrabalhadosPorMes
+        {
+            get { return diasTrabalhadosPorMes; }
+            set
+            {
+                SetProperty(ref diasTrabalhadosPorMes, value);
+                CalcularValorHora();
+            }
+        }
+
+        private int diasFeriasPorAno;
+        public int DiasFeriasPorAno
+        {
+            get { return diasFeriasPorAno; }
+            set
+            {
+                SetProperty(ref diasFeriasPorAno, value);
+                CalcularValorHora();
+            }
+        }
+
+        private double valorDaHora;
+        public double ValorDaHora
+        {
+            get { return valorDaHora; }
+            set { SetProperty(ref valorDaHora, value); }
+        }
+
+        private Profissional profissional;
+        public Profissional Profissional
+        {
+            get { return profissional; }
+            set
+            {
+                SetProperty(ref profissional, value);
+            }
+        }
+
+        public Command GravarCommand { get; }
+
+        public CalculoValorHoraPageViewModel()
+        {
+            GravarCommand = new Command(ExecuteGravarCommand);
+            Profissional = new Profissional();
+        }
+
+        private void CalcularValorHora()
+        {
+
+            double valorGanhoAnual = ValorGanhoMes * 12;
+            int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
+
+            if (DiasFeriasPorAno > 0)
+            {
+                totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+            }
+
+            ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
+        }
+
+        private async void ExecuteGravarCommand(object obj)
+        {
+            Profissional.ValorGanhoMes = ValorGanhoMes;
+            Profissional.HorasTrabalhadasPorDia = HorasTrabalhadasPorDia;
+            Profissional.DiasTrabalhadosPorMes = DiasTrabalhadosPorMes;
+            Profissional.DiasFeriasPorAno = DiasFeriasPorAno;
+            Profissional.ValorPorHora = ValorDaHora;
+
+            var profissionalAzureClient = new AzureRepository();
+            profissionalAzureClient.Insert(Profissional);
+
+            await App.Current.MainPage.DisplayAlert("Sucesso", "Valor por hora gravado!", "Ok");
+        }
+    }
+````
