@@ -118,7 +118,7 @@ Vamos criar a ViewModel para a nossa View CalculoValorHoraPage. Iremos remover t
 
 ### Variáveis Bindables
 
-Vamos criar para cada elemento que tinhamos na View (ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes, DiasFeriasPorAno, ValorDaHora e o Profissional) uma propriedade bindable na nossa ViewModel. Uma propriedade bindable quer dizer que é uma propriedade que ao ser alterada deverá ser notificada sua alteração. Primeiramente criamos uma variável privada e depois uma pública, nessa última, no set deveremos chamar o SetProperty, que verificará se houve alteração no valor da variável e realizar a notificação informando que teve alteração no conteúdo da variável. Por convensão, a variável privada é escrita em minúscula e a pública maiúscula. O ValorGanhoMes ficará dessa forma:
+Vamos criar para cada elemento que tinhamos na View (ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes, DiasFeriasPorAno, DiasDoencaPorAno, ValorDaHora e o Profissional) uma propriedade bindable na nossa ViewModel. Uma propriedade bindable quer dizer que é uma propriedade que ao ser alterada deverá ser notificada sua alteração. Primeiramente criamos uma variável privada e depois uma pública, nessa última, no set deveremos chamar o SetProperty, que verificará se houve alteração no valor da variável e realizar a notificação informando que teve alteração no conteúdo da variável. Por convensão, a variável privada é escrita em minúscula e a pública maiúscula. O ValorGanhoMes ficará dessa forma:
 
 
 ```c#
@@ -181,6 +181,17 @@ Agora vamos fazer para o restante das variáveis:
             }
         }
 
+        private int diasDoencaPorAno;
+        public int DiasDoencaPorAno
+        {
+            get { return diasDoencaPorAno; }
+            set
+            {
+                SetProperty(ref diasDoencaPorAno, value);
+                CalcularValorHora();
+            }
+        }
+
         private double valorDaHora;
         public double ValorDaHora
         {
@@ -218,6 +229,11 @@ Antes tinhamos a função CalcularValorHoraButton_Clicked, agora vamos recriá-l
                     totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
                 }
 
+                if (DiasDoencaPorAno > 0)
+                {
+                    totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
+                }
+
                 ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
             }
         }
@@ -229,22 +245,6 @@ Como dito durante a aula, além da View referenciar as variáveis, ela pode cham
 
 ```c#
   public Command GravarCommand { get; }
-
-  private void CalcularValorHora()
-  {
-
-      if (ValorGanhoMes > 0 && DiasTrabalhadosPorMes > 0 && HorasTrabalhadasPorDia > 0) {
-	double valorGanhoAnual = ValorGanhoMes * 12;
-	int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
-
-	if (DiasFeriasPorAno > 0)
-	{
-	    totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
-	}
-
-	ValorDaHora = valorGanhoAnual / (totalDiasTrabalhadosPorAno * HorasTrabalhadasPorDia);
-    }
-  }
 ````
 
 Agora vamos criar um construtor para a nossa classe e instanciar esse objeto do tipo Command. Ao instanciar esse objeto, devemos informar a ele o nome da função responsável por cuidar do comando, ou seja, qual função será executada quando o commando for acionado. Vamor aproveitar e instanciar o nosso objeto Profissional também. Dessa forma: 
@@ -423,6 +423,7 @@ Nossa ViewModel ficará assim:
             Profissional.HorasTrabalhadasPorDia = HorasTrabalhadasPorDia;
             Profissional.DiasTrabalhadosPorMes = DiasTrabalhadosPorMes;
             Profissional.DiasFeriasPorAno = DiasFeriasPorAno;
+            Profissional.DiasDoencaPorAno = DiasDoencaPorAno;
             Profissional.ValorPorHora = ValorDaHora;
 
             var profissionalAzureClient = new AzureRepository();
@@ -445,8 +446,7 @@ Vamos alterar nossa View para ficar vinculada a ViewModel que criamos anteriorme
 		public CalculoValorHoraPage ()
 		{
 			InitializeComponent ();
-
-            CalcularValorHoraButton.Clicked += CalcularValorHoraButton_Clicked;
+            		CalcularValorHoraButton.Clicked += CalcularValorHoraButton_Clicked;
 		}       
     }
 ````
@@ -460,9 +460,9 @@ No construtor vamos remover a linha da vinculação do evento de Clicked. Após 
 		public CalculoValorHoraPage ()
 		{
 			InitializeComponent ();
-            var viewModel = new CalculoValorHoraPageViewModel();
-            BindingContext = viewModel;
-        }       
+		        var viewModel = new CalculoValorHoraPageViewModel();
+		        BindingContext = viewModel;
+		}       
     }
 ````
 
@@ -495,6 +495,11 @@ Agora vamos editar o arquivo CalculoValorHoraPage.xaml. Em nossos Entrys não pr
             <Label Text="Dias de férias por ano" />
             <Entry Placeholder="Dias de férias por ano"
                    Text="{Binding DiasFeriasPorAno}"
+                   Keyboard="Numeric"/>	
+	
+            <Label Text="Dias de doença por ano" />
+            <Entry Placeholder="Dias de doença por ano"
+                   Text="{Binding DiasDoencaPorAno}"
                    Keyboard="Numeric"/>
 
             <Label Text="R$ 00,00 / hora"
@@ -560,7 +565,12 @@ Nosso arquivo .xaml ficou dessa forma:
             <Entry Placeholder="Dias de férias por ano"
                    Text="{Binding DiasFeriasPorAno}"
                    Keyboard="Numeric"/>
-
+	
+            <Label Text="Dias de doença por ano" />
+            <Entry Placeholder="Dias de doença por ano"
+                   Text="{Binding DiasDoencaPorAno}"
+                   Keyboard="Numeric"/>
+	
             <Label Text="{Binding ValorDaHora, StringFormat='{0:C} / hora'}"
                    FontSize="Large"
                    TextColor="Green"/>
