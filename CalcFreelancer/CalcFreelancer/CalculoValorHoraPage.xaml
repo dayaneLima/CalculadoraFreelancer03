@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CalcFreelancer.CalculoValorHoraPage"
+             Title="Valor da Hora"
+             Padding="10">
+    <ContentPage.Content>
+        <StackLayout>
+
+            <Label Text="Valor ganho por mês" />
+            <Entry Placeholder="Valor ganho por mês"
+                  Text="{Binding ValorGanhoMes}"
+                  Keyboard="Numeric"/>
+
+            <Label Text="Horas trabalhadas por dia" />
+            <Entry Placeholder="Horas trabalhadas por dia"
+                  Text="{Binding HorasTrabalhadasPorDia}"
+                  Keyboard="Numeric"/>
+
+            <Label Text="Dias trabalhados por mês" />
+            <Entry Placeholder="Dias trabalhados por mês"
+                  Text="{Binding DiasTrabalhadosPorMes}"
+                  Keyboard="Numeric"/>
+
+            <Label Text="Dias de férias por ano" />
+            <Entry Placeholder="Dias de férias por ano"
+                  Text="{Binding DiasFeriasPorAno}"
+                  Keyboard="Numeric"/>
+
+            <Label Text="{Binding ValorDaHora, StringFormat='{0:C} / hora'}"
+                     FontSize="Large"
+                     TextColor="Green"/>
+
+            <Button Text="Gravar"
+                   BackgroundColor="#6699ff"
+                   TextColor="White"    
+                   Command="{Binding GravarCommand}"/>
+
+
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
