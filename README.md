@@ -423,7 +423,6 @@ Nossa ViewModel ficará assim:
 Vamos alterar nossa View para ficar vinculada a ViewModel que criamos anteriormente. Vamos editar o arquivo CalculoValorHoraPage.xaml.cs, vamos apagar todas as funções que haviamos criado, deixando apenas o construtor:
 
 ```c#
-	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class CalculoValorHoraPage : ContentPage
 	{
 		public CalculoValorHoraPage ()
@@ -431,7 +430,7 @@ Vamos alterar nossa View para ficar vinculada a ViewModel que criamos anteriorme
 			InitializeComponent ();
             		CalcularValorHoraButton.Clicked += CalcularValorHoraButton_Clicked;
 		}       
-    }
+	}
 ````
 
 No construtor vamos remover a linha da vinculação do evento de Clicked. Após vamos atribuir ao Binding da nossa View que será a sua fonte de dados, ou seja, a nossa ViewModel, para isso vamos criar uma instância da CalculoValorHoraPageViewModel e atribuir a propriedade BindingContext da nossa classe. Nossa CalculoValorHoraPage.xaml.cs ficará assim:
@@ -560,15 +559,357 @@ Nosso arquivo .xaml ficou dessa forma:
 ````
 ## Testando o projeto
 
-Altere o arquivo App.xaml.cs para chamar a nossa tela, assim:
+Execute o projeto e veja se tudo continua funcionando.
+
+
+## Criação da ProjetoPageViewModel
+
+Agora que adicionamos a ViewModel para o nosso Profissional, vamos também criar uma para o nosso Projeto.
+
+Crie dentro da pasta ViewModels uma classe chamada ProjetoPageViewModel e herde da ViewModelBase.
+
+Crie as variáveis bindables para as propriedades que precisamos para a tela, São elas: Nome (string), ValorPorHora (double), HorasPorDia (int), DiasDuracaoProjeto (int) e ValorTotal (double).
+
+A classe ficará assim:
 
 ```c#
-	public App ()
-	{
-		InitializeComponent();
+public class ProjetoPageViewModel : ViewModelBase
+    {
+        private string nome;
+        public string Nome
+        {
+            get { return nome; }
+            set { SetProperty(ref nome, value); }
+        }
 
-		MainPage = new NavigationPage(new CalculoValorHoraPage());
+        private double valorPorHora;
+        public double ValorPorHora
+        {
+            get { return valorPorHora; }
+            set
+            {
+                SetProperty(ref valorPorHora, value);
+            }
+        }
+
+        private int horasPorDia;
+        public int HorasPorDia
+        {
+            get { return horasPorDia; }
+            set
+            {
+                SetProperty(ref horasPorDia, value);
+            }
+        }
+
+        private int diasDuracaoProjeto;
+        public int DiasDuracaoProjeto
+        {
+            get { return diasDuracaoProjeto; }
+            set
+            {
+                SetProperty(ref diasDuracaoProjeto, value);
+            }
+        }
+
+        private double valorTotal;
+        public double ValorTotal
+        {
+            get { return valorTotal; }
+            set { SetProperty(ref valorTotal, value); }
+        }
+    }
+````
+
+Na função GravarButton_Clicked realizávamos o cálculo do valor total do projeto e chamávamos a função de gravar. Vamos nos basear nessa função, primeiramente faça a do cálculo, como mostrado a seguir:
+
+```c#
+     private void CalcularValorTotal()
+        {
+            if (ValorPorHora > 0 && HorasPorDia > 0 && DiasDuracaoProjeto > 0)
+            {
+                ValorTotal = ValorPorHora * HorasPorDia * DiasDuracaoProjeto;
+            }
+            else
+            {
+                ValorTotal = 0;
+            }
+        }
+````
+
+Agora ao alterar qualquer propriedade que influenciará no cálculo do valor do projeto chame a função CalcularValorTotal(), você fará isso no Set das propriedades, como fizemos na da CalculoValorHoraPageViewModel:
+
+```c#
+public class ProjetoPageViewModel : ViewModelBase
+{
+    ...
+    
+ 	private double valorPorHora;
+        public double ValorPorHora
+        {
+            get { return valorPorHora; }
+            set
+            {
+                SetProperty(ref valorPorHora, value);
+                CalcularValorTotal();
+            }
+        }
+
+        private int horasPorDia;
+        public int HorasPorDia
+        {
+            get { return horasPorDia; }
+            set
+            {
+                SetProperty(ref horasPorDia, value);
+                CalcularValorTotal();
+            }
+        }
+
+        private int diasDuracaoProjeto;
+        public int DiasDuracaoProjeto
+        {
+            get { return diasDuracaoProjeto; }
+            set
+            {
+                SetProperty(ref diasDuracaoProjeto, value);
+                CalcularValorTotal();
+            }
+        }
+	
+	...
+}
+	
+````
+
+Agora vamos criar dois Commands, um para gravar o nosso projeto e o outro para limpar os campos
+
+```c#
+        public Command GravarCommand { get; }
+        public Command LimparCommand { get; }
+````
+
+Crie um construtor para a ViewModel para instancias os dois Commands e crie as funções para gravar e limpar, como mostrado a seguir
+
+```c#
+        public ProjetoPageViewModel()
+        {
+            GravarCommand = new Command(ExecuteGravarCommand);
+            LimparCommand = new Command(ExecuteLimparCommand);
+        }
+
+        private void ExecuteLimparCommand()
+        {
+            Nome = string.Empty;
+            HorasPorDia = 0;
+            DiasDuracaoProjeto = 0;
+        }
+
+        private async void ExecuteGravarCommand()
+        {
+            var projetoAzureClient = new AzureProjetoRepository();
+
+            projetoAzureClient.Insert(new Models.Projeto()
+            {
+                ValorPorHora = ValorPorHora,
+                HorasPorDia = HorasPorDia,
+                DiasDuracaoProjeto = DiasDuracaoProjeto,
+                ValorTotal = ValorTotal
+            });
+
+
+            ExecuteLimparCommand();
+
+            await App.Current.MainPage.DisplayAlert("Sucesso", "Projeto gravado!", "Ok");
+        }
+````
+
+A ProjetoPageViewModel ficará assim:
+
+```C#
+public class ProjetoPageViewModel : ViewModelBase
+    {
+        private string nome;
+        public string Nome
+        {
+            get { return nome; }
+            set { SetProperty(ref nome, value); }
+        }
+
+        private double valorPorHora;
+        public double ValorPorHora
+        {
+            get { return valorPorHora; }
+            set
+            {
+                SetProperty(ref valorPorHora, value);
+                CalcularValorTotal();
+            }
+        }
+
+        private int horasPorDia;
+        public int HorasPorDia
+        {
+            get { return horasPorDia; }
+            set
+            {
+                SetProperty(ref horasPorDia, value);
+                CalcularValorTotal();
+            }
+        }
+
+        private int diasDuracaoProjeto;
+        public int DiasDuracaoProjeto
+        {
+            get { return diasDuracaoProjeto; }
+            set
+            {
+                SetProperty(ref diasDuracaoProjeto, value);
+                CalcularValorTotal();
+            }
+        }
+
+        private double valorTotal;
+        public double ValorTotal
+        {
+            get { return valorTotal; }
+            set { SetProperty(ref valorTotal, value); }
+        }
+
+        public Command GravarCommand { get; }
+        public Command LimparCommand { get; }
+
+        public ProjetoPageViewModel()
+        {
+            GravarCommand = new Command(ExecuteGravarCommand);
+            LimparCommand = new Command(ExecuteLimparCommand);
+        }
+
+        private void ExecuteLimparCommand()
+        {
+            Nome = string.Empty;
+            HorasPorDia = 0;
+            DiasDuracaoProjeto = 0;
+        }
+
+        private async void ExecuteGravarCommand()
+        {
+            var projetoAzureClient = new AzureProjetoRepository();
+
+            projetoAzureClient.Insert(new Models.Projeto()
+            {
+                ValorPorHora = ValorPorHora,
+                HorasPorDia = HorasPorDia,
+                DiasDuracaoProjeto = DiasDuracaoProjeto,
+                ValorTotal = ValorTotal
+            });
+
+
+            ExecuteLimparCommand();
+
+            await App.Current.MainPage.DisplayAlert("Sucesso", "Projeto gravado!", "Ok");
+        }
+
+        private void CalcularValorTotal()
+        {
+            if (ValorPorHora > 0 && HorasPorDia > 0 && DiasDuracaoProjeto > 0)
+            {
+                ValorTotal = ValorPorHora * HorasPorDia * DiasDuracaoProjeto;
+            }
+            else
+            {
+                ValorTotal = 0;
+            }
+        }
+
+    }
+````
+
+### Alteração da ProjetoPage.xaml
+
+Edite agora o ProjetoPage.xaml, remova todos os x:Name dos elementos da tela.
+
+Nos Entrys, na propriedade Text, adicione o Binding para a variável da ViewModel.
+
+Na label de valor total referencie sua variável que representa o valor total  do cálculo, e use o string format para formatar para moeda o resultado.
+
+Por último, nos botões de Limpar e de Gravar referenciem os respectivos Commands criados.
+
+Ficará assim:
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Projeto"
+             Padding="10"
+             x:Class="CalcFreelancer.ProjetoPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="Nome do Projeto" />
+                <Entry Placeholder="Nome do projeto"
+                   Text="{Binding Nome}" />
+
+                <Label Text="Valor por hora" />
+                <Entry Placeholder="Valor por hora"
+                   Keyboard="Numeric"
+                    Text="{Binding ValorPorHora}" />
+
+                <Label Text="Horas por dia" />
+                <Entry Placeholder="Horas por dia"
+                   Keyboard="Numeric"
+                    Text="{Binding HorasPorDia}" />
+
+                <Label Text="Dias de duração do projeto" />
+                <Entry Placeholder="Dias de duração do projeto"
+                   Keyboard="Numeric"
+                    Text="{Binding DiasDuracaoProjeto}" />
+
+                <Label FontSize="Large"
+                    Text="{Binding ValorTotal, StringFormat='{0:C} / hora'}" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            BackgroundColor="#cdcdcd"
+                            Text="Limpar"
+                            Command="{Binding LimparCommand}"/>
+                    <Button Grid.Column="1"
+                            Text="Gravar"
+                            TextColor="White"
+                            BackgroundColor="#6699ff"
+                            Command="{Binding GravarCommand}"/>
+                </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
+````
+
+### Alteração da ProjetoPage.xaml.cs
+
+Altere o construtor da classe ProjetoPage.xaml.cs para vincular o BindingContext da tela a nossa ViewModel que criamos no passo anterior. 
+
+Após, apague o restante das funções da ProjetoPage.xaml.cs.
+
+Ficará assim:
+
+```c#
+	public partial class ProjetoPage : ContentPage
+	{
+		public ProjetoPage ()
+		{
+			InitializeComponent ();
+			var viewModel = new ProjetoPageViewModel();
+			BindingContext = viewModel;
+		}
+
 	}
 ````
 
-Agora é só preencher as informações na tela que irá abrir e clicar em gravar =]
+### Testando o projeto
+
+Agora execute o projeto e veja se continua tudo funcionando corretamente.
