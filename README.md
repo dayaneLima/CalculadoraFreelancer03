@@ -111,14 +111,14 @@ aos interessados que houve alteração na propriedade, e por fim retornado true,
 Vamos criar a ViewModel para a nossa View CalculoValorHoraPage. Iremos remover toda a lógica do Code Behind e adicionar na nossa ViewModel. Dentro da pasta ViewModels, crie uma classe chamada CalculoValorHoraPageViewModel que herdará da nossa ViewModelBase criada anteriormente.
 
 ```c#
- public class CalculoValorHoraPageViewModel : ViewModelBase
-    {
-    }
+	public class CalculoValorHoraPageViewModel : ViewModelBase
+	{
+	}
 ````
 
 ### Variáveis Bindables
 
-Vamos criar para cada elemento que tinhamos na View (ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes, DiasFeriasPorAno, DiasDoencaPorAno, ValorDaHora e o Profissional) uma propriedade bindable na nossa ViewModel. Uma propriedade bindable quer dizer que é uma propriedade que ao ser alterada deverá ser notificada sua alteração. Primeiramente criamos uma variável privada e depois uma pública, nessa última, no set deveremos chamar o SetProperty, que verificará se houve alteração no valor da variável e realizar a notificação informando que teve alteração no conteúdo da variável. Por convensão, a variável privada é escrita em minúscula e a pública maiúscula. O ValorGanhoMes ficará dessa forma:
+Vamos criar para cada elemento que tinhamos na View (ValorGanhoMes, HorasTrabalhadasPorDia, DiasTrabalhadosPorMes, DiasFeriasPorAno, ValorDaHora e o Profissional) uma propriedade bindable na nossa ViewModel. Uma propriedade bindable quer dizer que é uma propriedade que ao ser alterada deverá ser notificada sua alteração. Primeiramente criamos uma variável privada e depois uma pública, nessa última, no set deveremos chamar o SetProperty, que verificará se houve alteração no valor da variável e realizar a notificação informando que teve alteração no conteúdo da variável. Por convensão, a variável privada é escrita em minúscula e a pública maiúscula. O ValorGanhoMes ficará dessa forma:
 
 
 ```c#
@@ -181,17 +181,6 @@ Agora vamos fazer para o restante das variáveis:
             }
         }
 
-        private int diasDoencaPorAno;
-        public int DiasDoencaPorAno
-        {
-            get { return diasDoencaPorAno; }
-            set
-            {
-                SetProperty(ref diasDoencaPorAno, value);
-                CalcularValorHora();
-            }
-        }
-
         private double valorDaHora;
         public double ValorDaHora
         {
@@ -225,11 +214,6 @@ Antes tinhamos a função CalcularValorHoraButton_Clicked, agora vamos recriá-l
                 int totalDiasTrabalhadosPorAno = DiasTrabalhadosPorMes * 12;
 
                 if (DiasFeriasPorAno > 0)
-                {
-                    totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
-                }
-
-                if (DiasDoencaPorAno > 0)
                 {
                     totalDiasTrabalhadosPorAno -= DiasFeriasPorAno;
                 }
@@ -423,7 +407,6 @@ Nossa ViewModel ficará assim:
             Profissional.HorasTrabalhadasPorDia = HorasTrabalhadasPorDia;
             Profissional.DiasTrabalhadosPorMes = DiasTrabalhadosPorMes;
             Profissional.DiasFeriasPorAno = DiasFeriasPorAno;
-            Profissional.DiasDoencaPorAno = DiasDoencaPorAno;
             Profissional.ValorPorHora = ValorDaHora;
 
             var profissionalAzureClient = new AzureRepository();
@@ -496,11 +479,6 @@ Agora vamos editar o arquivo CalculoValorHoraPage.xaml. Em nossos Entrys não pr
             <Entry Placeholder="Dias de férias por ano"
                    Text="{Binding DiasFeriasPorAno}"
                    Keyboard="Numeric"/>	
-	
-            <Label Text="Dias de doença por ano" />
-            <Entry Placeholder="Dias de doença por ano"
-                   Text="{Binding DiasDoencaPorAno}"
-                   Keyboard="Numeric"/>
 
             <Label Text="R$ 00,00 / hora"
                    FontSize="Large"
@@ -564,11 +542,6 @@ Nosso arquivo .xaml ficou dessa forma:
             <Label Text="Dias de férias por ano" />
             <Entry Placeholder="Dias de férias por ano"
                    Text="{Binding DiasFeriasPorAno}"
-                   Keyboard="Numeric"/>
-	
-            <Label Text="Dias de doença por ano" />
-            <Entry Placeholder="Dias de doença por ano"
-                   Text="{Binding DiasDoencaPorAno}"
                    Keyboard="Numeric"/>
 	
             <Label Text="{Binding ValorDaHora, StringFormat='{0:C} / hora'}"
